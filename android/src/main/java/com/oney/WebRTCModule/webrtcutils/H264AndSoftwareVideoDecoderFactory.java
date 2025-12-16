@@ -16,7 +16,7 @@ import java.util.List;
  * This is a custom video decoder factory for WebRTC which behaves similarly
  * to the default one in iOS. It supports the following codecs:
  *
- * - In hardware: H.264 (high, baseline)
+ * - In hardware: H.264 (high, baseline), H.265
  * - In software: VP8, VP9, AV1
  */
 public class H264AndSoftwareVideoDecoderFactory implements VideoDecoderFactory {
@@ -31,7 +31,7 @@ public class H264AndSoftwareVideoDecoderFactory implements VideoDecoderFactory {
     @Nullable
     @Override
     public VideoDecoder createDecoder(VideoCodecInfo codecInfo) {
-        if (codecInfo.name.equalsIgnoreCase("H264")) {
+        if (codecInfo.name.equalsIgnoreCase("H264") || codecInfo.name.equalsIgnoreCase("H265")) {
             return this.hardwareVideoDecoderFactory.createDecoder(codecInfo);
         }
 
@@ -44,6 +44,7 @@ public class H264AndSoftwareVideoDecoderFactory implements VideoDecoderFactory {
 
         VideoCodecInfo h264Baseline = null;
         VideoCodecInfo h264High = null;
+        List<VideoCodecInfo> h265Codecs = new ArrayList<>();
 
         VideoCodecInfo[] hwCodecs = this.hardwareVideoDecoderFactory.getSupportedCodecs();
         for (VideoCodecInfo hwCodec : hwCodecs) {
@@ -57,6 +58,8 @@ public class H264AndSoftwareVideoDecoderFactory implements VideoDecoderFactory {
                 } else if (profileLevel.equalsIgnoreCase(VideoCodecInfo.H264_CONSTRAINED_BASELINE_3_1)) {
                     h264Baseline = hwCodec;
                 }
+            } else if (hwCodec.name.equalsIgnoreCase("H265")) {
+                h265Codecs.add(hwCodec);
             }
         }
 
@@ -66,6 +69,7 @@ public class H264AndSoftwareVideoDecoderFactory implements VideoDecoderFactory {
         if (h264Baseline != null) {
             codecs.add(h264Baseline);
         }
+        codecs.addAll(h265Codecs);
         codecs.addAll(Arrays.asList(this.softwareVideoDecoderFactory.getSupportedCodecs()));
 
         return codecs.toArray(new VideoCodecInfo[codecs.size()]);

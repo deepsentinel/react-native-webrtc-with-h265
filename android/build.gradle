@@ -31,6 +31,8 @@ android {
 
 dependencies {
     implementation "com.facebook.react:react-android:+"
-    api 'org.jitsi:webrtc:124.+'
+    // Use original jitsi WebRTC for compilation only
+    // Runtime will use H.265 AAR provided by main app
+    compileOnly 'org.jitsi:webrtc:124.+'
     implementation "androidx.core:core:1.7.0"
 }
